@@ -1,151 +1,19 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Holo JS</title>
-    <style> 
-      body {padding: 0; margin: 0; background-color:#000;}
-      #viewportUp {
-        position:absolute;
-        top:0px;
-        left:300px;
-        width:300px;
-        height:300px;
-        -webkit-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        transform: rotate(0deg);
-      }
-      #viewportLeft {
-        position:absolute;
-        top:300px;
-        left:0px;
-        width:300px;
-        height:300px;
-        -webkit-transform: rotate(270deg);
-        -moz-transform: rotate(270deg);
-        -o-transform: rotate(270deg);
-        -ms-transform: rotate(270deg);
-        transform: rotate(270deg);
-      }
-      #centerpoint {
-        position:absolute;
-        top:325px;
-        left:325px;
-        width:250px;
-        height:250px;
-        background-color:#FFF;
-      }
-      #viewportRight {
-        position:absolute;
-        top:300px;
-        left:600px;
-        width:300px;
-        height:300px;
-        -webkit-transform: rotate( 90deg);
-        -moz-transform: rotate( 90deg);
-        -o-transform: rotate( 90deg);
-        -ms-transform: rotate( 90deg);
-        transform: rotate( 90deg);
-      }
-      #viewportDown {
-        position:absolute;
-        top:600px;
-        left:300px;
-        width:300px;
-        height:300px;
-        -webkit-transform: rotate(180deg);
-        -moz-transform: rotate(180deg);
-        -o-transform: rotate(180deg);
-        -ms-transform: rotate(180deg);
-        transform: rotate(180deg);
-      }
-      #container {
-        width:900px;
-        height:900px;
-        position: absolute;
-        top:0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container">
-      <canvas id='viewportUp'></canvas>
-      <canvas id='viewportLeft'></canvas>
-      <canvas id='centerpoint'></canvas>
-      <canvas id='viewportDown'></canvas>
-      <canvas id='viewportRight'></canvas>
-    </div>
-    <script src="../common/js/three.min.js"></script>
-    <script src="../common/js/OBJLoader.js"></script>
-    <script>
-      var upCanvas = document.getElementById("viewportUp")
-      var upRenderer = new THREE.WebGLRenderer({ canvas: upCanvas });
+<head>
+<title>Welcome to nginx on Debian!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Holo Web Demos</h1>
+<a href="three/">Three</a>
+<a href="p5/">P5</a>
 
-      var leftCanvas = document.getElementById("viewportLeft")
-      var leftRenderer = new THREE.WebGLRenderer({ canvas: leftCanvas });
-
-      var downCanvas = document.getElementById("viewportDown")
-      var downRenderer = new THREE.WebGLRenderer({ canvas: downCanvas });
-
-      var rightCanvas = document.getElementById("viewportRight")
-      var rightRenderer = new THREE.WebGLRenderer({ canvas: rightCanvas });
-
-      var manager = new THREE.LoadingManager();
-      manager.onProgress = function ( item, loaded, total ) {
-      
-        console.log( item, loaded, total );
-      
-      };
-      function render ( renderer ) {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
-        material = new THREE.MeshStandardMaterial( { color: 0x00ffff } );
-
-
-        var lights = [];
-        lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-        lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-        lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-        
-        lights[ 0 ].position.set( 0, 200, 0 );
-        lights[ 1 ].position.set( 100, 200, 100 );
-        lights[ 2 ].position.set( - 100, - 200, - 100 );
-        
-        camera.position.z = 2.0;
-
-        var update = function () {
-          requestAnimationFrame( update );
-
-          scene.add( lights[ 0 ] );
-          scene.add( lights[ 1 ] );
-          scene.add( lights[ 2 ] );
-
-          scene.add(mtobj);
-          mtobj.rotation.z += 0.01;
-          renderer.render(scene, camera);
-        };
-        var mtobj = null;
-        var loader = new THREE.OBJLoader( manager );
-        loader.load( '../common/obj/bb8.obj', function ( obj ) {
-          obj.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              child.material = material;
-            }
-          });
-          mtobj = obj;
-          mtobj.rotation.x = -Math.PI/2;
-          mtobj.position.y -= 0.5;
-          update();
-        });
-      }
-      render(upRenderer);
-      render(leftRenderer);
-      render(downRenderer);
-      render(rightRenderer);
-    </script>
-  </body>
+</body>
 </html>
