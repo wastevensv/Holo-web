@@ -69,9 +69,16 @@
         right: 0;
         margin: auto;
       }
+      #loader {
+        position:fixed;
+      }
     </style>
   </head>
   <body>
+    <form action="#" id="loader">
+      <input type="text" id="filename">
+      <input type="submit" onclick="updateModel()" value="Open">
+    </form>
     <div id="container">
       <canvas id='viewportUp'></canvas>
       <canvas id='viewportLeft'></canvas>
@@ -82,30 +89,19 @@
     <script src="../common/js/three.min.js"></script>
     <script src="../common/js/OBJLoader.js"></script>
     <script>
-      var upCanvas = document.getElementById("viewportUp")
-      var upRenderer = new THREE.WebGLRenderer({ canvas: upCanvas });
-
-      var leftCanvas = document.getElementById("viewportLeft")
-      var leftRenderer = new THREE.WebGLRenderer({ canvas: leftCanvas });
-
-      var downCanvas = document.getElementById("viewportDown")
-      var downRenderer = new THREE.WebGLRenderer({ canvas: downCanvas });
-
-      var rightCanvas = document.getElementById("viewportRight")
-      var rightRenderer = new THREE.WebGLRenderer({ canvas: rightCanvas });
-
-      var manager = new THREE.LoadingManager();
-      manager.onProgress = function ( item, loaded, total ) {
-      
-        console.log( item, loaded, total );
-      
-      };
-      function render ( renderer ) {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
-        material = new THREE.MeshStandardMaterial( { color: 0x00ffff } );
-
-
+        var upCanvas = document.getElementById("viewportUp")
+        var upRenderer = new THREE.WebGLRenderer({ canvas: upCanvas });
+        
+        var leftCanvas = document.getElementById("viewportLeft")
+        var leftRenderer = new THREE.WebGLRenderer({ canvas: leftCanvas });
+        
+        var downCanvas = document.getElementById("viewportDown")
+        var downRenderer = new THREE.WebGLRenderer({ canvas: downCanvas });
+        
+        var rightCanvas = document.getElementById("viewportRight")
+        var rightRenderer = new THREE.WebGLRenderer({ canvas: rightCanvas });
+        
+        var manager = new THREE.LoadingManager();
         var lights = [];
         lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
         lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
@@ -115,37 +111,61 @@
         lights[ 1 ].position.set( 100, 200, 100 );
         lights[ 2 ].position.set( - 100, - 200, - 100 );
         
-        camera.position.z = 2.0;
-
-        var update = function () {
-          requestAnimationFrame( update );
-
-          scene.add( lights[ 0 ] );
-          scene.add( lights[ 1 ] );
-          scene.add( lights[ 2 ] );
-
-          scene.add(mtobj);
-          mtobj.rotation.z += 0.01;
-          renderer.render(scene, camera);
-        };
-        var mtobj = null;
-        var loader = new THREE.OBJLoader( manager );
-        loader.load( '../common/obj/bb8.obj', function ( obj ) {
-          obj.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              child.material = material;
+        manager.onProgress = function ( item, loaded, total ) {};
+        mtobj = null;
+        function render ( renderer ) {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
+            material = new THREE.MeshStandardMaterial( { color: 0x00ffff } );
+        
+            renderer.setSize(300, 300);
+            camera.position.z = 2.0;
+            update(renderer, mtobj);
+        }
+        function update(renderer) {
+            requestAnimationFrame( function() {
+                update(renderer);
+            } );
+        
+            renderer.clear()
+            for (let i = scene.children.length - 1; i >= 0 ; i--) {
+                let child = scene.children[ i ];
+                scene.remove(child);
             }
-          });
-          mtobj = obj;
-          mtobj.rotation.x = -Math.PI/2;
-          mtobj.position.y -= 0.5;
-          update();
-        });
-      }
-      render(upRenderer);
-      render(leftRenderer);
-      render(downRenderer);
-      render(rightRenderer);
+            scene.add( lights[ 0 ] );
+            scene.add( lights[ 1 ] );
+            scene.add( lights[ 2 ] );
+        
+            if(mtobj) {
+                mtobj.rotation.z += 0.005;
+                scene.add(mtobj);
+            }
+            renderer.render(scene, camera);
+        };
+        function loadObject(objfile) {
+            mtobj = null;
+            var loader = new THREE.OBJLoader( manager );
+            loader.load( objfile, function ( obj ) { 
+                obj.traverse(function (child) {
+                    if (child instanceof THREE.Mesh) {
+                        child.material = material;
+                    }
+                });
+                mtobj = obj;
+                mtobj.rotation.x = -Math.PI/2;
+                mtobj.position.y -= 0.5;
+                mtobj.position.z = 0;
+            });
+        }
+        loadObject("../common/obj/bb8.obj");
+        render(upRenderer);
+        render(leftRenderer);
+        render(downRenderer);
+        render(rightRenderer);
+        
+        function updateModel() {
+            loadObject("../common/obj/"+document.getElementById("filename").value)
+        }
     </script>
   </body>
 </html>
