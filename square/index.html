@@ -76,7 +76,14 @@
   </head>
   <body>
     <form action="#" id="loader">
-      <input type="text" id="filename">
+      <select id="filename">
+        <option value="bb8.obj">BB8</option>
+        <option value="csh.obj">CSH</option>
+        <option value="logo.obj">OpenSCAD Logo</option>
+        <option value="h2g2coin.obj">H2G2 Coin</option>
+        <option value="tesseract.obj">Math Model</option>
+        <option value="tesseract.obj">Teapot</option>
+      </select>
       <input type="submit" onclick="updateModel()" value="Open">
     </form>
     <div id="container">
@@ -112,7 +119,9 @@
         lights[ 2 ].position.set( - 100, - 200, - 100 );
         
         manager.onProgress = function ( item, loaded, total ) {};
+
         mtobj = null;
+
         function render ( renderer ) {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
@@ -153,8 +162,12 @@
                 });
                 mtobj = obj;
                 mtobj.rotation.x = -Math.PI/2;
-                mtobj.position.y -= 0.5;
-                mtobj.position.z = 0;
+
+                var box = new THREE.Box3().setFromObject( mtobj );
+                var aspectratio = box.size().normalize()
+                mtobj.scale.x = 1/box.size().x * aspectratio.x;
+                mtobj.scale.y = 1/box.size().y * aspectratio.y;
+                mtobj.scale.z = 1/box.size().z * aspectratio.z;
             });
         }
         loadObject("../common/obj/bb8.obj");

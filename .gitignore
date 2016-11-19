@@ -2,3 +2,4 @@
 .git/
 Vagrantfile
 .deploycmd*
+common/obj/
