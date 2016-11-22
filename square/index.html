@@ -97,6 +97,7 @@
     <script src="../common/js/three.min.js"></script>
     <script src="../common/js/OBJLoader.js"></script>
     <script>
+        // Create a rendering instance for each canvas
         var upCanvas = document.getElementById("viewportUp")
         var upRenderer = new THREE.WebGLRenderer({ canvas: upCanvas });
         
@@ -109,7 +110,15 @@
         var rightCanvas = document.getElementById("viewportRight")
         var rightRenderer = new THREE.WebGLRenderer({ canvas: rightCanvas });
         
+        // Setup loading manager for obj files
         var manager = new THREE.LoadingManager();
+        manager.onProgress = function ( item, loaded, total ) {};
+        loader = new THREE.OBJLoader( manager );
+
+        // Setup objects for scene
+        mtobj = null;
+        material = new THREE.MeshStandardMaterial( { color: 0x00ffff } );
+
         var lights = [];
         lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
         lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
@@ -119,51 +128,64 @@
         lights[ 1 ].position.set( 100, 200, 100 );
         lights[ 2 ].position.set( - 100, - 200, - 100 );
         
-        manager.onProgress = function ( item, loaded, total ) {};
+        camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
+        camera.position.z = 2.0;
 
-        mtobj = null;
+        // Create scene
+        scene = new THREE.Scene();
 
+        // Function to begin rendering on a canvas renderer
         function render ( renderer ) {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
-            material = new THREE.MeshStandardMaterial( { color: 0x00ffff } );
-        
             renderer.setSize(300, 300);
-            camera.position.z = 2.0;
-            update(renderer, mtobj);
+            update(renderer);
         }
+
+        // Function to update renderer on each animation frame
         function update(renderer) {
+            // Request next animation frame
             requestAnimationFrame( function() {
                 update(renderer);
             } );
         
+            // Clear scene entirely
             renderer.clear()
             for (let i = scene.children.length - 1; i >= 0 ; i--) {
                 let child = scene.children[ i ];
                 scene.remove(child);
             }
+
+            // Rebuild scene lighting
             scene.add( lights[ 0 ] );
             scene.add( lights[ 1 ] );
             scene.add( lights[ 2 ] );
-        
+
+            // If object is not null, rotate object and render
             if(mtobj) {
                 mtobj.rotation.z += 0.005;
                 scene.add(mtobj);
             }
             renderer.render(scene, camera);
         };
+
+        // Load new object
         function loadObject(objfile) {
+            // Remove old object
             mtobj = null;
-            var loader = new THREE.OBJLoader( manager );
+
+            // Start loading new object
             loader.load( objfile, function ( obj ) { 
+                // Apply material to the mesh
                 obj.traverse(function (child) {
                     if (child instanceof THREE.Mesh) {
                         child.material = material;
                     }
                 });
+
+                // Set mtobj to new object
                 mtobj = obj;
                 mtobj.rotation.x = -Math.PI/2;
 
+                // Normalize object size
                 var box = new THREE.Box3().setFromObject( mtobj );
                 var aspectratio = box.size().normalize()
                 mtobj.scale.x = 1/box.size().x * aspectratio.x;
@@ -171,12 +193,17 @@
                 mtobj.scale.z = 1/box.size().z * aspectratio.z;
             });
         }
+
+        // Load default object
         loadObject("../common/obj/bb8.obj");
+
+        // Render each canvas frame
         render(upRenderer);
         render(leftRenderer);
         render(downRenderer);
         render(rightRenderer);
         
+        // Helper function for model selection dropdown.
         function updateModel() {
             loadObject("../common/obj/"+document.getElementById("filename").value)
         }
